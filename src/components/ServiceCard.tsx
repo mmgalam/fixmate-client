@@ -1,6 +1,6 @@
-import Link from "next/link";
-import { MapPin, User, Wrench } from "lucide-react";
-import Image from "next/image";
+import Link from 'next/link';
+import Image from 'next/image';
+import { MapPin, User, Wrench } from 'lucide-react';
 
 export interface ServiceItem {
   _id: string;
@@ -10,7 +10,7 @@ export interface ServiceItem {
   image: string;
   basePrice: number;
   estimatedDuration: string;
-  serviceMode: "Home Visit" | "Shop Drop-off";
+  serviceMode: 'Home Visit' | 'Shop Drop-off';
   serviceArea: string;
   technicianName: string;
   technicianEmail: string;
@@ -23,12 +23,14 @@ export default function ServiceCard({ service }: { service: ServiceItem }) {
         <Image
           src={service.image}
           alt={service.title}
-          className="w-full h-full object-cover"
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+          className="object-cover"
         />
-        <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white">
+        <span className="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white">
           {service.category}
         </span>
-        <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-medium bg-white/95 text-slate-800 shadow-xs">
+        <span className="absolute top-3 right-3 z-10 px-2.5 py-1 rounded-full text-xs font-medium bg-white/95 text-slate-800 shadow-xs">
           {service.serviceMode}
         </span>
       </div>

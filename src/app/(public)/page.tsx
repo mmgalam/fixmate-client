@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import ServiceCard, { ServiceItem } from '@/components/ServiceCard';
 import {
@@ -20,18 +21,6 @@ import Image from 'next/image';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-async function getLatestServices(): Promise<ServiceItem[]> {
-  try {
-    const res = await fetch(`${API_URL}/api/services?limit=6`, {
-      cache: 'no-store',
-    });
-    if (!res.ok) return [];
-    return res.json();
-  } catch {
-    return [];
-  }
-}
-
 const CATEGORIES = [
   { name: 'Smartphone', icon: Smartphone },
   { name: 'Laptop & PC', icon: Laptop },
@@ -42,9 +31,51 @@ const CATEGORIES = [
   { name: 'Electrical', icon: Zap },
 ];
 
-export default async function HomePage() {
-  const latestServices = await getLatestServices();
+// 1. Dynamic Async Component wrapped in Suspense
+async function FeaturedServicesSection() {
+  let latestServices: ServiceItem[] = [];
+  try {
+    const res = await fetch(`${API_URL}/api/services?limit=6`, {
+      cache: 'no-store',
+    });
+    if (res.ok) {
+      latestServices = await res.json();
+    }
+  } catch {
+    latestServices = [];
+  }
 
+  if (latestServices.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+        <p className="text-slate-600">No approved services available yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {latestServices.map((service) => (
+        <ServiceCard key={service._id} service={service} />
+      ))}
+    </div>
+  );
+}
+
+function FeaturedServicesSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[...Array(6)].map((_, i) => (
+        <div
+          key={i}
+          className="h-80 bg-white rounded-2xl border border-slate-200 animate-pulse"
+        />
+      ))}
+    </div>
+  );
+}
+
+export default function HomePage() {
   return (
     <div>
       {/* 1. Hero Banner */}
@@ -87,13 +118,16 @@ export default async function HomePage() {
             <Image
               src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=900&q=80"
               alt="Technician repairing electronic circuit board"
+              width={900}
+              height={600}
+              priority
               className="rounded-2xl shadow-2xl border border-white/10 object-cover h-100 w-full"
             />
           </div>
         </div>
       </section>
 
-      {/* 2. Dynamic Featured Services (6 Latest Approved) */}
+      {/* 2. Dynamic Featured Services (6 Latest Approved) wrapped in Suspense */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
           <div>
@@ -112,17 +146,9 @@ export default async function HomePage() {
           </Link>
         </div>
 
-        {latestServices.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-            <p className="text-slate-600">No approved services available yet.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {latestServices.map((service) => (
-              <ServiceCard key={service._id} service={service} />
-            ))}
-          </div>
-        )}
+        <Suspense fallback={<FeaturedServicesSkeleton />}>
+          <FeaturedServicesSection />
+        </Suspense>
       </section>
 
       {/* 3. How FixMate Works (4-Step Visual Flow) */}

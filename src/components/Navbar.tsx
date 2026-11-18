@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { useSession, signOut } from '@/lib/auth-client';
-import { toast } from 'sonner';
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useSession, signOut } from "@/lib/auth-client";
+import { toast } from "sonner";
 import {
   Wrench,
   Menu,
@@ -13,8 +13,8 @@ import {
   UserCog,
   LogOut,
   ChevronDown,
-} from 'lucide-react';
-import Image from 'next/image';
+} from "lucide-react";
+import Image from "next/image";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -25,21 +25,21 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const navLinks = [
-    { label: 'Home', href: '/' },
-    { label: 'Services', href: '/services' },
-    { label: 'About', href: '/about' },
+    { label: "Home", href: "/" },
+    { label: "Services", href: "/services" },
+    { label: "About", href: "/about" },
   ];
 
   const user = session?.user;
-  const role = (user?.role as string) || 'customer';
+  const role = (user?.role as string) || "customer";
   const dashboardHref = `/dashboard/${role}`;
 
   const handleSignOut = async () => {
     await signOut();
     setDropdownOpen(false);
     setMobileOpen(false);
-    toast.success('Signed out successfully');
-    router.push('/');
+    toast.success("Signed out successfully");
+    router.push("/");
   };
 
   return (
@@ -59,8 +59,8 @@ export default function Navbar() {
         <nav className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => {
             const isActive =
-              link.href === '/'
-                ? pathname === '/'
+              link.href === "/"
+                ? pathname === "/"
                 : pathname.startsWith(link.href);
             return (
               <Link
@@ -68,8 +68,8 @@ export default function Navbar() {
                 href={link.href}
                 className={`text-sm font-semibold transition ${
                   isActive
-                    ? 'text-blue-600 border-b-2 border-blue-600 py-5'
-                    : 'text-slate-600 hover:text-slate-900 py-5'
+                    ? "text-blue-600 border-b-2 border-blue-600 py-5"
+                    : "text-slate-600 hover:text-slate-900 py-5"
                 }`}
               >
                 {link.label}
@@ -107,10 +107,12 @@ export default function Navbar() {
                   src={
                     user.image ||
                     `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                      user.name || 'User'
-                    )}&background=2563eb&color=fff`
+                      user.name || "User",
+                    )}&background=2563eb&color=fff&format=png`
                   }
-                  alt={user.name || 'User'}
+                  alt={user.name || "User"}
+                  width={32}
+                  height={32}
                   className="w-8 h-8 rounded-full object-cover"
                 />
                 <span className="text-sm font-semibold text-slate-800 max-w-30 truncate">
@@ -170,7 +172,11 @@ export default function Navbar() {
           className="md:hidden p-2 rounded-lg text-slate-700 hover:bg-slate-100"
           aria-label="Toggle menu"
         >
-          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {mobileOpen ? (
+            <X className="w-6 h-6" />
+          ) : (
+            <Menu className="w-6 h-6" />
+          )}
         </button>
       </div>
 
@@ -183,7 +189,7 @@ export default function Navbar() {
               href={link.href}
               onClick={() => setMobileOpen(false)}
               className={`block py-2 text-sm font-semibold ${
-                pathname === link.href ? 'text-blue-600' : 'text-slate-700'
+                pathname === link.href ? "text-blue-600" : "text-slate-700"
               }`}
             >
               {link.label}
@@ -211,7 +217,9 @@ export default function Navbar() {
             ) : (
               <div className="space-y-2">
                 <div className="flex items-center gap-2.5 pb-2">
-                  <span className="text-sm font-bold text-slate-900">{user.name}</span>
+                  <span className="text-sm font-bold text-slate-900">
+                    {user.name}
+                  </span>
                   <span className="px-2 py-0.5 text-xs font-semibold uppercase rounded-full bg-blue-50 text-blue-700">
                     {role}
                   </span>
