@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { useSession, signOut } from '@/lib/auth-client';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useSession, signOut } from "@/lib/auth-client";
+import { toast } from "sonner";
 import {
   Wrench,
   LayoutDashboard,
@@ -22,8 +22,8 @@ import {
   Menu,
   X,
   LucideIcon,
-} from 'lucide-react';
-import Image from 'next/image';
+} from "lucide-react";
+import Image from "next/image";
 
 interface NavItem {
   label: string;
@@ -33,22 +33,54 @@ interface NavItem {
 
 const ROLE_MENUS: Record<string, NavItem[]> = {
   customer: [
-    { label: 'Overview', href: '/dashboard/customer', icon: LayoutDashboard },
-    { label: 'My Bookings', href: '/dashboard/customer/bookings', icon: ClipboardList },
-    { label: 'Payment History', href: '/dashboard/customer/payments', icon: CreditCard },
+    { label: "Overview", href: "/dashboard/customer", icon: LayoutDashboard },
+    {
+      label: "My Bookings",
+      href: "/dashboard/customer/bookings",
+      icon: ClipboardList,
+    },
+    {
+      label: "Payment History",
+      href: "/dashboard/customer/payments",
+      icon: CreditCard,
+    },
   ],
   technician: [
-    { label: 'Overview', href: '/dashboard/technician', icon: LayoutDashboard },
-    { label: 'Add a Service', href: '/dashboard/technician/add-service', icon: PlusCircle },
-    { label: 'My Services', href: '/dashboard/technician/my-services', icon: Briefcase },
-    { label: 'Manage Requests', href: '/dashboard/technician/requests', icon: Inbox },
+    { label: "Overview", href: "/dashboard/technician", icon: LayoutDashboard },
+    {
+      label: "Add a Service",
+      href: "/dashboard/technician/add-service",
+      icon: PlusCircle,
+    },
+    {
+      label: "My Services",
+      href: "/dashboard/technician/my-services",
+      icon: Briefcase,
+    },
+    {
+      label: "Manage Requests",
+      href: "/dashboard/technician/requests",
+      icon: Inbox,
+    },
   ],
   admin: [
-    { label: 'Overview', href: '/dashboard/admin', icon: LayoutDashboard },
-    { label: 'Manage Users', href: '/dashboard/admin/users', icon: Users },
-    { label: 'Service Approval', href: '/dashboard/admin/services', icon: CheckSquare },
-    { label: 'All Bookings', href: '/dashboard/admin/bookings', icon: ClipboardList },
-    { label: 'Transactions', href: '/dashboard/admin/transactions', icon: Receipt },
+    { label: "Overview", href: "/dashboard/admin", icon: LayoutDashboard },
+    { label: "Manage Users", href: "/dashboard/admin/users", icon: Users },
+    {
+      label: "Service Approval",
+      href: "/dashboard/admin/services",
+      icon: CheckSquare,
+    },
+    {
+      label: "All Bookings",
+      href: "/dashboard/admin/bookings",
+      icon: ClipboardList,
+    },
+    {
+      label: "Transactions",
+      href: "/dashboard/admin/transactions",
+      icon: Receipt,
+    },
   ],
 };
 
@@ -63,7 +95,7 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const user = session?.user;
-  const role = (user?.role as string) || 'customer';
+  const role = (user?.role as string) || "customer";
 
   useEffect(() => {
     if (isPending) return;
@@ -75,18 +107,21 @@ export default function DashboardLayout({
     }
 
     // 2. Redirect /dashboard root to role-specific overview
-    if (pathname === '/dashboard') {
+    if (pathname === "/dashboard") {
       router.replace(`/dashboard/${role}`);
       return;
     }
 
     // 3. Enforce role-based route protection (allow /dashboard/profile for all roles)
-    if (!pathname.startsWith('/dashboard/profile')) {
-      if (pathname.startsWith('/dashboard/customer') && role !== 'customer') {
+    if (!pathname.startsWith("/dashboard/profile")) {
+      if (pathname.startsWith("/dashboard/customer") && role !== "customer") {
         router.replace(`/dashboard/${role}`);
-      } else if (pathname.startsWith('/dashboard/technician') && role !== 'technician') {
+      } else if (
+        pathname.startsWith("/dashboard/technician") &&
+        role !== "technician"
+      ) {
         router.replace(`/dashboard/${role}`);
-      } else if (pathname.startsWith('/dashboard/admin') && role !== 'admin') {
+      } else if (pathname.startsWith("/dashboard/admin") && role !== "admin") {
         router.replace(`/dashboard/${role}`);
       }
     }
@@ -102,13 +137,13 @@ export default function DashboardLayout({
 
   const menuItems = [
     ...(ROLE_MENUS[role] || ROLE_MENUS.customer),
-    { label: 'Update Profile', href: '/dashboard/profile', icon: UserCog },
+    { label: "Update Profile", href: "/dashboard/profile", icon: UserCog },
   ];
 
   const handleSignOut = async () => {
     await signOut();
-    toast.success('Signed out successfully');
-    router.push('/');
+    toast.success("Signed out successfully");
+    router.push("/");
   };
 
   return (
@@ -124,7 +159,7 @@ export default function DashboardLayout({
       {/* Collapsible Sidebar */}
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-300 flex flex-col transition-transform duration-200 lg:static lg:translate-x-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="h-16 px-6 flex items-center justify-between border-b border-slate-800">
@@ -155,8 +190,8 @@ export default function DashboardLayout({
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition ${
                   isActive
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    ? "bg-blue-600 text-white shadow-xs"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
                 }`}
               >
                 <Icon className="w-4 h-4 shrink-0" />
@@ -214,10 +249,13 @@ export default function DashboardLayout({
               src={
                 user.image ||
                 `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                  user.name || 'User'
+                  user.name || "User",
                 )}&background=2563eb&color=fff`
               }
-              alt={user.name || 'User'}
+              alt={user.name || "User"}
+              width={36}
+              height={36}
+              unoptimized
               className="w-9 h-9 rounded-full object-cover border border-slate-200"
             />
           </div>
