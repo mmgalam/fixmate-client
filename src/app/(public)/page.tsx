@@ -1,293 +1,465 @@
-import Link from "next/link";
+import { Suspense } from 'react';
+import Link from 'next/link';
+import ServiceCard from '@/components/ServiceCard';
+import type { Service } from '@/types';
 import {
   Search,
+  Send,
+  Wrench,
+  CreditCard,
+  ShieldCheck,
+  CheckCircle2,
   Smartphone,
   Laptop,
   Wind,
-  Snowflake,
+  Refrigerator,
   Tv,
-  Shirt,
+  WashingMachine,
   Zap,
-  ShieldCheck,
-  CreditCard,
+  Sparkles,
   Activity,
-  BadgeCheck,
+  Lock,
   ArrowRight,
-  Wrench,
-  MousePointerClick,
-  Send,
-  Star,
-} from "lucide-react";
-import ServiceCard, { type ServiceItem } from "@/components/ServiceCard";
+  Cpu,
+} from 'lucide-react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-async function getFeaturedServices(): Promise<ServiceItem[]> {
+const CATEGORIES = [
+  { name: 'Smartphone', icon: Smartphone, desc: 'OLED & Battery' },
+  { name: 'Laptop & PC', icon: Laptop, desc: 'Logic Board & OS' },
+  { name: 'AC', icon: Wind, desc: 'Jet Wash & Gas' },
+  { name: 'Refrigerator', icon: Refrigerator, desc: 'Cooling & PCB' },
+  { name: 'TV', icon: Tv, desc: 'Panel & Backlight' },
+  { name: 'Washing Machine', icon: WashingMachine, desc: 'Drum & Motor' },
+  { name: 'Electrical', icon: Zap, desc: 'Smart Wiring' },
+];
+
+async function FeaturedServicesSection() {
+  let latestServices: Service[] = [];
   try {
-    const res = await fetch(`${API_URL}/api/services?sort=newest&limit=6`, {
-      cache: "no-store",
+    const res = await fetch(`${API_URL}/api/services?limit=6`, {
+      cache: 'no-store',
     });
-    if (!res.ok) return [];
-    const data = await res.json();
-    const list: ServiceItem[] = Array.isArray(data) ? data : data.services || [];
-    return list.slice(0, 6);
+    if (res.ok) {
+      latestServices = await res.json();
+    }
   } catch {
-    return [];
+    latestServices = [];
   }
-}
 
-const categories = [
-  { name: "Smartphone", icon: Smartphone },
-  { name: "Laptop & PC", icon: Laptop },
-  { name: "AC", icon: Wind },
-  { name: "Refrigerator", icon: Snowflake },
-  { name: "TV", icon: Tv },
-  { name: "Washing Machine", icon: Shirt },
-  { name: "Electrical", icon: Zap },
-];
-
-const steps = [
-  { icon: MousePointerClick, title: "Find a Service", text: "Browse verified technicians and pick the repair you need." },
-  { icon: Send, title: "Send a Request", text: "Describe the problem, choose a date and send your request." },
-  { icon: Wrench, title: "Technician Fixes It", text: "Track every step: accepted, in progress, completed." },
-  { icon: CreditCard, title: "Pay After Completion", text: "Pay securely online only when the job is done." },
-];
-
-const trust = [
-  { icon: BadgeCheck, title: "Verified Technicians", text: "Every service is reviewed and approved by our admin team." },
-  { icon: Activity, title: "Live Job Tracking", text: "Know exactly what is happening with your device at all times." },
-  { icon: ShieldCheck, title: "Pay After Service", text: "No upfront payment. You pay only after the work is delivered." },
-];
-
-const stats = [
-  { value: "500+", label: "Verified Technicians" },
-  { value: "12,000+", label: "Jobs Completed" },
-  { value: "4.8/5", label: "Average Rating" },
-  { value: "100%", label: "Pay After Service" },
-];
-
-const testimonials = [
-  { name: "Rafiq Ahmed", area: "Mirpur, Dhaka", text: "My laptop was fixed in one day and I could track every step. I paid only after it worked perfectly." },
-  { name: "Nusrat Jahan", area: "Dhanmondi, Dhaka", text: "The AC technician arrived on time and the final price matched what was agreed. Very trustworthy." },
-  { name: "Tanvir Hasan", area: "Uttara, Dhaka", text: "Finally a platform where I do not have to pay first. The status updates are really helpful." },
-];
-
-export default async function HomePage() {
-  const featured = await getFeaturedServices();
+  if (latestServices.length === 0) {
+    return (
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-12 text-center shadow-3d-card">
+        <p className="text-slate-600 dark:text-slate-400">No approved services available yet.</p>
+      </div>
+    );
+  }
 
   return (
-    <>
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-teal-900 text-white">
-        <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-teal-500/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-amber-500/10 blur-3xl" />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+      {latestServices.map((service) => (
+        <ServiceCard key={service._id} service={service} />
+      ))}
+    </div>
+  );
+}
 
-        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-28">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-400/10 px-4 py-1.5 text-xs font-semibold text-teal-300">
-              <BadgeCheck className="h-4 w-4" /> Trusted by thousands of customers
-            </span>
-            <h1 className="mt-6 text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl">
-              Broken Device? Get It Fixed by{" "}
-              <span className="bg-gradient-to-r from-teal-300 to-amber-300 bg-clip-text text-transparent">
-                Verified Technicians
-              </span>
+function FeaturedServicesSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+      {[...Array(6)].map((_, i) => (
+        <div
+          key={i}
+          className="h-80 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 animate-pulse shadow-3d-card"
+        />
+      ))}
+    </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <div>
+      {/* 1. SPATIAL 3D HERO SECTION */}
+      <section className="bg-spatial-grid pt-14 pb-24 px-4 overflow-hidden border-b border-slate-200/80 dark:border-slate-800/80">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-12 items-center">
+          {/* Left Copy & 3D Floating Search Bar */}
+          <div className="lg:col-span-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-slate-900 border border-indigo-200/80 dark:border-indigo-500/30 text-indigo-700 dark:text-cyan-300 text-xs font-bold mb-6 shadow-md shadow-indigo-900/5">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-600 dark:text-cyan-400" />
+              <span>NEXT-GEN REPAIR BOOKING PLATFORM</span>
+            </div>
+
+            <h1
+              style={{ fontFamily: 'var(--font-display)' }}
+              className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-950 dark:text-white leading-[1.07]"
+            >
+              Device Down? Fixed by{' '}
+              <span className="bg-linear-to-r from-indigo-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                3D-Verified
+              </span>{' '}
+              Specialists.
             </h1>
-            <p className="mt-5 max-w-xl text-lg text-slate-300">
-              Book a repair in minutes, track your job step by step, and pay only after the work is completed.
+
+            <p className="mt-5 text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed max-w-xl">
+              Book admin-approved technicians for smartphones, laptops, and home appliances. Track live diagnostics and pay via Stripe only after completion.
             </p>
 
-            <form action="/services" method="GET" className="mt-8 flex max-w-xl flex-col gap-3 sm:flex-row">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            {/* 3D Elevated Search Console */}
+            <form
+              action="/services"
+              method="GET"
+              className="mt-8 flex flex-col sm:flex-row gap-2 max-w-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-2 rounded-2xl border border-white dark:border-slate-800 shadow-[0_20px_50px_-12px_rgba(79,70,229,0.22)]"
+            >
+              <div className="flex-1 flex items-center pl-3">
+                <Search className="w-4 h-4 text-indigo-600 dark:text-cyan-400 shrink-0" />
                 <input
                   type="text"
                   name="search"
-                  placeholder="Search e.g. iPhone screen, AC servicing..."
-                  className="w-full rounded-xl border border-white/10 bg-white py-3.5 pl-12 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  placeholder="Search 'iPhone screen', 'AC jet wash', 'MacBook'..."
+                  className="w-full px-3 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-400 text-sm bg-transparent focus:outline-none"
                 />
               </div>
-              <button type="submit" className="btn-primary !bg-amber-500 !text-slate-900 hover:!bg-amber-400">
-                Find Service
+              <button
+                type="submit"
+                className="px-6 py-3 bg-linear-to-r from-indigo-600 to-cyan-600 hover:from-indigo-700 hover:to-cyan-700 text-white font-bold rounded-xl text-sm shadow-lg shadow-indigo-600/30 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 shrink-0"
+              >
+                Find Services
+                <ArrowRight className="w-4 h-4" />
               </button>
             </form>
 
-            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-300">
-              <span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-teal-300" /> Pay after service</span>
-              <span className="flex items-center gap-2"><Activity className="h-4 w-4 text-teal-300" /> Live tracking</span>
-              <span className="flex items-center gap-2"><Star className="h-4 w-4 text-amber-300" /> Rated technicians</span>
+            {/* Quick Category Pills */}
+            <div className="mt-6 flex flex-wrap items-center gap-2 text-xs">
+              <span className="font-bold text-slate-400">Trending:</span>
+              {['Smartphone', 'Laptop & PC', 'AC', 'Refrigerator'].map((cat) => (
+                <Link
+                  key={cat}
+                  href={`/services?category=${encodeURIComponent(cat)}`}
+                  className="px-3.5 py-1.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-indigo-500 dark:hover:border-cyan-400 hover:text-indigo-600 dark:hover:text-cyan-400 hover:shadow-md hover:-translate-y-0.5 font-semibold transition-all"
+                >
+                  {cat}
+                </Link>
+              ))}
             </div>
           </div>
 
-          {/* Illustration (no external image needed) */}
-          <div className="relative mx-auto hidden w-full max-w-md lg:block">
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur">
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
-                  <Wrench className="h-7 w-7" />
+          {/* Right: 3D Isometric Stacked Hardware & Telemetry Cards */}
+          <div className="lg:col-span-6 perspective-1200 relative py-6">
+            <div
+              aria-hidden="true"
+              className="absolute inset-8 bg-linear-to-tr from-indigo-500/25 via-cyan-400/20 to-purple-500/25 blur-3xl rounded-full"
+            />
+
+            <div
+              aria-hidden="true"
+              className="hidden sm:block absolute -top-2 right-4 w-[88%] h-72 rounded-3xl bg-linear-to-br from-indigo-600/90 to-cyan-600/90 opacity-30 transform rotate-3 translate-x-4 -translate-y-3 shadow-2xl"
+            />
+
+            <div className="relative animate-float-3d bg-slate-950/95 backdrop-blur-xl text-white rounded-3xl p-6 sm:p-7 border border-white/15 shadow-[0_35px_70px_-15px_rgba(15,23,42,0.55)]">
+              <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-rose-500" />
+                  <span className="w-3 h-3 rounded-full bg-amber-400" />
+                  <span className="w-3 h-3 rounded-full bg-emerald-400" />
                 </div>
-                <div>
-                  <p className="font-bold">iPhone Screen Replacement</p>
-                  <p className="text-xs text-slate-400">Dhanmondi, Dhaka</p>
-                </div>
+                <span
+                  style={{ fontFamily: 'var(--font-mono)' }}
+                  className="text-[11px] text-cyan-400 font-semibold tracking-wider"
+                >
+                  {'3D_DIAGNOSTIC // #FM-8821'}
+                </span>
               </div>
-              <div className="mt-6 space-y-3">
-                {[
-                  { label: "Requested", done: true },
-                  { label: "Accepted", done: true },
-                  { label: "In Progress", done: true },
-                  { label: "Completed", done: false },
-                ].map((s) => (
-                  <div key={s.label} className="flex items-center gap-3">
-                    <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${s.done ? "bg-teal-400 text-slate-900" : "bg-white/10 text-slate-400"}`}>
-                      {s.done ? "✓" : "•"}
+
+              <div className="mt-5 flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3.5">
+                  <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-indigo-500 to-cyan-500 flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/30">
+                    <Cpu className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <span
+                      style={{ fontFamily: 'var(--font-mono)' }}
+                      className="text-[10px] uppercase tracking-widest text-cyan-300 font-bold"
+                    >
+                      IN PROGRESS • HOME VISIT
                     </span>
-                    <span className={s.done ? "text-sm font-medium" : "text-sm text-slate-400"}>{s.label}</span>
+                    <h3
+                      style={{ fontFamily: 'var(--font-display)' }}
+                      className="text-lg font-extrabold mt-0.5"
+                    >
+                      MacBook Pro M-Series Logic & Thermal Care
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Specialist: Tariqul Islam • Verified Pro
+                    </p>
+                  </div>
+                </div>
+
+                <span
+                  style={{ fontFamily: 'var(--font-mono)' }}
+                  className="px-3 py-1.5 rounded-xl bg-white/10 border border-white/15 text-cyan-300 text-sm font-black shrink-0"
+                >
+                  $55.00
+                </span>
+              </div>
+
+              <div className="mt-6 space-y-2.5 bg-white/4 p-4 rounded-2xl border border-white/10">
+                {[
+                  { label: '01. Request Accepted & Dispatched', done: true },
+                  { label: '02. Precision Hardware Calibration', done: true, active: true },
+                  { label: '03. Completed — Stripe Checkout Unlocks', done: false },
+                ].map((step) => (
+                  <div
+                    key={step.label}
+                    className="flex items-center justify-between text-xs"
+                  >
+                    <span className={step.done ? 'text-slate-100 font-medium' : 'text-slate-500'}>
+                      {step.label}
+                    </span>
+                    {step.active ? (
+                      <span
+                        style={{ fontFamily: 'var(--font-mono)' }}
+                        className="px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[10px] font-bold"
+                      >
+                        LIVE
+                      </span>
+                    ) : step.done ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    ) : (
+                      <span className="text-[10px] font-mono text-slate-500">ESCROW</span>
+                    )}
                   </div>
                 ))}
               </div>
-              <div className="mt-6 flex items-center justify-between rounded-xl bg-white/10 px-4 py-3">
-                <span className="text-sm text-slate-300">Pay after completion</span>
-                <span className="text-lg font-extrabold text-amber-300">$45</span>
+
+              <div className="mt-5 flex items-center justify-between text-xs text-slate-400">
+                <span className="flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-emerald-400" />
+                  Zero Upfront Risk:
+                </span>
+                <span
+                  style={{ fontFamily: 'var(--font-mono)' }}
+                  className="text-emerald-400 font-bold"
+                >
+                  PAY AFTER COMPLETION
+                </span>
+              </div>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-3 animate-float-badge bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-4 py-3 rounded-2xl border border-white dark:border-slate-700 shadow-[0_20px_40px_-10px_rgba(15,23,42,0.25)] absolute -bottom-3 -left-4 z-20">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/30">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs font-extrabold text-slate-950 dark:text-white">
+                  100% Admin-Vetted
+                </p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Stripe Verified Escrow
+                </p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* STATS */}
-      <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-4 py-8 sm:px-6 md:grid-cols-4 lg:px-8">
-          {stats.map((s) => (
-            <div key={s.label} className="text-center">
-              <p className="text-3xl font-extrabold text-primary">{s.value}</p>
-              <p className="mt-1 text-sm text-slate-500">{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* FEATURED SERVICES */}
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+      {/* 2. 3D INTERACTIVE FEATURED SERVICES */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
           <div>
-            <p className="text-sm font-bold uppercase tracking-wider text-primary">Latest Services</p>
-            <h2 className="section-title mt-2">Featured Repair Services</h2>
+            <span
+              style={{ fontFamily: 'var(--font-mono)' }}
+              className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-cyan-400"
+            >
+              {'// INTERACTIVE 3D CATALOG'}
+            </span>
+            <h2
+              style={{ fontFamily: 'var(--font-display)' }}
+              className="text-3xl font-black text-slate-950 dark:text-white mt-1"
+            >
+              Latest Repair Services
+            </h2>
+            <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">
+              Hover over any card to inspect in 3D—all listings are admin-verified
+            </p>
           </div>
-          <Link href="/services" className="btn-outline">
-            View All <ArrowRight className="h-4 w-4" />
+          <Link
+            href="/services"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-bold text-indigo-600 dark:text-cyan-400 hover:border-indigo-500 hover:shadow-md transition-all"
+          >
+            Browse All Services
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
 
-        {featured.length > 0 ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.map((service) => (
-              <ServiceCard key={service._id} service={service} />
-            ))}
-          </div>
-        ) : (
-          <div className="card-base py-16 text-center">
-            <Wrench className="mx-auto h-10 w-10 text-slate-300" />
-            <p className="mt-4 font-semibold text-slate-700">No services available yet</p>
-            <p className="mt-1 text-sm text-slate-500">Please check back soon.</p>
-          </div>
-        )}
+        <Suspense fallback={<FeaturedServicesSkeleton />}>
+          <FeaturedServicesSection />
+        </Suspense>
       </section>
 
-      {/* HOW IT WORKS */}
-      <section className="bg-white py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 text-center">
-            <p className="text-sm font-bold uppercase tracking-wider text-primary">Simple Process</p>
-            <h2 className="section-title mt-2">How FixMate Works</h2>
+      {/* 3. HOW FIXMATE WORKS */}
+      <section className="bg-white dark:bg-slate-900/60 border-y border-slate-200/80 dark:border-slate-800/80 py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <span
+              style={{ fontFamily: 'var(--font-mono)' }}
+              className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-cyan-400"
+            >
+              {'// SEAMLESS PIPELINE'}
+            </span>
+            <h2
+              style={{ fontFamily: 'var(--font-display)' }}
+              className="text-3xl font-black text-slate-950 dark:text-white mt-1"
+            >
+              How FixMate Works
+            </h2>
+            <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base mt-2">
+              Four transparent stages from instant booking to verified completion
+            </p>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {steps.map((step, i) => (
-              <div key={step.title} className="card-base card-hover relative p-6 text-center">
-                <span className="absolute right-4 top-4 text-5xl font-extrabold text-slate-100">{i + 1}</span>
-                <div className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-primary">
-                  <step.icon className="h-7 w-7" />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                step: '01',
+                title: 'Find a Service',
+                desc: 'Filter admin-approved technicians by device category, area, and Home Visit or Shop Drop-off mode.',
+                icon: Search,
+              },
+              {
+                step: '02',
+                title: 'Send a Request',
+                desc: 'Describe your fault, choose a preferred date, and submit a booking request with zero advance fee.',
+                icon: Send,
+              },
+              {
+                step: '03',
+                title: 'Technician Fixes It',
+                desc: 'Track live progress from Accepted to In Progress and Completed inside your dashboard.',
+                icon: Wrench,
+              },
+              {
+                step: '04',
+                title: 'Pay After Completion',
+                desc: 'Pay the confirmed final invoice via Stripe Checkout only after your device is fixed.',
+                icon: CreditCard,
+              },
+            ].map((item) => (
+              <div
+                key={item.step}
+                className="group p-6 rounded-3xl bg-[#F8FAFC] dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-800/90 hover:-translate-y-2 hover:border-indigo-300 dark:hover:border-cyan-500/50 shadow-3d-card hover:shadow-2xl transition-all duration-300"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-indigo-600 to-cyan-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/25 group-hover:scale-110 group-hover:rotate-3 transition-transform">
+                    <item.icon className="w-5 h-5" />
+                  </div>
+                  <span
+                    style={{ fontFamily: 'var(--font-mono)' }}
+                    className="text-sm font-black text-slate-300 dark:text-slate-700 group-hover:text-indigo-500 dark:group-hover:text-cyan-400 transition-colors"
+                  >
+                    {item.step}
+                  </span>
                 </div>
-                <h3 className="relative mt-5 text-lg font-bold">{step.title}</h3>
-                <p className="relative mt-2 text-sm text-slate-600">{step.text}</p>
+                <h3
+                  style={{ fontFamily: 'var(--font-display)' }}
+                  className="text-lg font-extrabold text-slate-950 dark:text-white"
+                >
+                  {item.title}
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                  {item.desc}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CATEGORIES */}
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mb-12 text-center">
-          <p className="text-sm font-bold uppercase tracking-wider text-primary">What Do You Need?</p>
-          <h2 className="section-title mt-2">Popular Categories</h2>
+      {/* 4. POPULAR CATEGORIES & OBSIDIAN TRUST VAULT */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <span
+            style={{ fontFamily: 'var(--font-mono)' }}
+            className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-cyan-400"
+          >
+            {'// DEVICE SPECIALTIES'}
+          </span>
+          <h2
+            style={{ fontFamily: 'var(--font-display)' }}
+            className="text-3xl font-black text-slate-950 dark:text-white mt-1"
+          >
+            Popular Categories
+          </h2>
         </div>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-7">
-          {categories.map((cat) => (
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4 mb-20">
+          {CATEGORIES.map(({ name, icon: Icon, desc }) => (
             <Link
-              key={cat.name}
-              href={`/services?category=${encodeURIComponent(cat.name)}`}
-              className="card-base card-hover flex flex-col items-center gap-3 p-5 text-center hover:border-primary"
+              key={name}
+              href={`/services?category=${encodeURIComponent(name)}`}
+              className="group p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-3d-card hover:shadow-[0_22px_40px_-10px_rgba(79,70,229,0.28)] hover:border-indigo-500 dark:hover:border-cyan-400 hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center"
             >
-              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-50 text-primary">
-                <cat.icon className="h-6 w-6" />
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-cyan-400 group-hover:bg-linear-to-br group-hover:from-indigo-600 group-hover:to-cyan-500 group-hover:text-white group-hover:shadow-lg group-hover:shadow-indigo-600/30 flex items-center justify-center transition-all duration-300 mb-3.5">
+                <Icon className="w-6 h-6" />
+              </div>
+              <span className="text-sm font-extrabold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-cyan-400 transition-colors">
+                {name}
               </span>
-              <span className="text-sm font-semibold text-slate-800">{cat.name}</span>
+              <span className="text-[11px] text-slate-400 mt-1">{desc}</span>
             </Link>
           ))}
         </div>
-      </section>
 
-      {/* WHY CHOOSE US + TESTIMONIALS */}
-      <section className="bg-slate-900 py-20 text-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 text-center">
-            <p className="text-sm font-bold uppercase tracking-wider text-teal-300">Why FixMate</p>
-            <h2 className="section-title mt-2 !text-white">Why Choose Us</h2>
-          </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            {trust.map((t) => (
-              <div key={t.title} className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-                  <t.icon className="h-6 w-6" />
-                </div>
-                <h3 className="mt-4 text-lg font-bold">{t.title}</h3>
-                <p className="mt-2 text-sm text-slate-300">{t.text}</p>
-              </div>
-            ))}
-          </div>
+        <div className="bg-slate-950 dark:bg-slate-900 rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden shadow-[0_30px_60px_-15px_rgba(15,23,42,0.45)] border border-white/10">
+          <div
+            aria-hidden="true"
+            className="absolute -top-24 -right-24 w-80 h-80 bg-indigo-600/25 blur-3xl rounded-full"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute -bottom-24 -left-24 w-80 h-80 bg-cyan-500/20 blur-3xl rounded-full"
+          />
 
-          <div className="mt-14 grid gap-6 md:grid-cols-3">
-            {testimonials.map((t) => (
-              <div key={t.name} className="rounded-2xl bg-white p-6 text-slate-800">
-                <div className="flex gap-0.5 text-amber-500">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-current" />
-                  ))}
-                </div>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">&ldquo;{t.text}&rdquo;</p>
-                <div className="mt-4">
-                  <p className="text-sm font-bold">{t.name}</p>
-                  <p className="text-xs text-slate-500">{t.area}</p>
-                </div>
+          <div className="relative z-10 grid md:grid-cols-3 gap-8">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-6 h-6" />
               </div>
-            ))}
+              <div>
+                <h3 className="font-extrabold text-lg">Admin-Approved Services</h3>
+                <p className="text-sm text-slate-400 mt-1 leading-relaxed">
+                  Every service listing goes through admin moderation before becoming publicly visible.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 flex items-center justify-center shrink-0">
+                <Activity className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-lg">Live Status Pipeline</h3>
+                <p className="text-sm text-slate-400 mt-1 leading-relaxed">
+                  Track every update from Requested to Accepted, In Progress, and Completed.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 flex items-center justify-center shrink-0">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-lg">Pay Only After Service</h3>
+                <p className="text-sm text-slate-400 mt-1 leading-relaxed">
+                  Zero advance payment—settle your confirmed invoice securely via Stripe after completion.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
-
-      {/* CTA */}
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-        <div className="rounded-3xl bg-gradient-to-r from-primary to-teal-600 px-8 py-14 text-center text-white">
-          <h2 className="text-3xl font-extrabold sm:text-4xl">Are you a skilled technician?</h2>
-          <p className="mx-auto mt-3 max-w-xl text-teal-50">
-            List your repair services on FixMate and get new customers every day.
-          </p>
-          <Link href="/sign-up" className="btn-primary mt-7 !bg-white !text-primary !shadow-none hover:!bg-slate-100">
-            Join as a Technician <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </section>
-    </>
+    </div>
   );
 }

@@ -1,10 +1,13 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useSession, signOut } from "@/lib/auth-client";
-import { toast } from "sonner";
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { usePathname, useRouter } from 'next/navigation';
+import { useSession, signOut } from '@/lib/auth-client';
+import ThemeToggle from '@/components/ThemeToggle';
+import { toast } from 'sonner';
+import type { LucideIcon } from 'lucide-react';
 import {
   Wrench,
   LayoutDashboard,
@@ -21,9 +24,7 @@ import {
   LogOut,
   Menu,
   X,
-  LucideIcon,
-} from "lucide-react";
-import Image from "next/image";
+} from 'lucide-react';
 
 interface NavItem {
   label: string;
@@ -33,54 +34,22 @@ interface NavItem {
 
 const ROLE_MENUS: Record<string, NavItem[]> = {
   customer: [
-    { label: "Overview", href: "/dashboard/customer", icon: LayoutDashboard },
-    {
-      label: "My Bookings",
-      href: "/dashboard/customer/bookings",
-      icon: ClipboardList,
-    },
-    {
-      label: "Payment History",
-      href: "/dashboard/customer/payments",
-      icon: CreditCard,
-    },
+    { label: 'Overview', href: '/dashboard/customer', icon: LayoutDashboard },
+    { label: 'My Bookings', href: '/dashboard/customer/bookings', icon: ClipboardList },
+    { label: 'Payment History', href: '/dashboard/customer/payments', icon: CreditCard },
   ],
   technician: [
-    { label: "Overview", href: "/dashboard/technician", icon: LayoutDashboard },
-    {
-      label: "Add a Service",
-      href: "/dashboard/technician/add-service",
-      icon: PlusCircle,
-    },
-    {
-      label: "My Services",
-      href: "/dashboard/technician/my-services",
-      icon: Briefcase,
-    },
-    {
-      label: "Manage Requests",
-      href: "/dashboard/technician/requests",
-      icon: Inbox,
-    },
+    { label: 'Overview', href: '/dashboard/technician', icon: LayoutDashboard },
+    { label: 'Add a Service', href: '/dashboard/technician/add-service', icon: PlusCircle },
+    { label: 'My Services', href: '/dashboard/technician/my-services', icon: Briefcase },
+    { label: 'Manage Requests', href: '/dashboard/technician/requests', icon: Inbox },
   ],
   admin: [
-    { label: "Overview", href: "/dashboard/admin", icon: LayoutDashboard },
-    { label: "Manage Users", href: "/dashboard/admin/users", icon: Users },
-    {
-      label: "Service Approval",
-      href: "/dashboard/admin/services",
-      icon: CheckSquare,
-    },
-    {
-      label: "All Bookings",
-      href: "/dashboard/admin/bookings",
-      icon: ClipboardList,
-    },
-    {
-      label: "Transactions",
-      href: "/dashboard/admin/transactions",
-      icon: Receipt,
-    },
+    { label: 'Overview', href: '/dashboard/admin', icon: LayoutDashboard },
+    { label: 'Manage Users', href: '/dashboard/admin/users', icon: Users },
+    { label: 'Service Approval', href: '/dashboard/admin/services', icon: CheckSquare },
+    { label: 'All Bookings', href: '/dashboard/admin/bookings', icon: ClipboardList },
+    { label: 'Transactions', href: '/dashboard/admin/transactions', icon: Receipt },
   ],
 };
 
@@ -95,33 +64,27 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const user = session?.user;
-  const role = (user?.role as string) || "customer";
+  const role = (user?.role as string) || 'customer';
 
   useEffect(() => {
     if (isPending) return;
 
-    // 1. Redirect unauthenticated users to /sign-in
     if (!user) {
       router.replace(`/sign-in?callbackUrl=${encodeURIComponent(pathname)}`);
       return;
     }
 
-    // 2. Redirect /dashboard root to role-specific overview
-    if (pathname === "/dashboard") {
+    if (pathname === '/dashboard') {
       router.replace(`/dashboard/${role}`);
       return;
     }
 
-    // 3. Enforce role-based route protection (allow /dashboard/profile for all roles)
-    if (!pathname.startsWith("/dashboard/profile")) {
-      if (pathname.startsWith("/dashboard/customer") && role !== "customer") {
+    if (!pathname.startsWith('/dashboard/profile')) {
+      if (pathname.startsWith('/dashboard/customer') && role !== 'customer') {
         router.replace(`/dashboard/${role}`);
-      } else if (
-        pathname.startsWith("/dashboard/technician") &&
-        role !== "technician"
-      ) {
+      } else if (pathname.startsWith('/dashboard/technician') && role !== 'technician') {
         router.replace(`/dashboard/${role}`);
-      } else if (pathname.startsWith("/dashboard/admin") && role !== "admin") {
+      } else if (pathname.startsWith('/dashboard/admin') && role !== 'admin') {
         router.replace(`/dashboard/${role}`);
       }
     }
@@ -129,46 +92,48 @@ export default function DashboardLayout({
 
   if (isPending || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#F4F6FB] dark:bg-[#060913]">
+        <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   const menuItems = [
     ...(ROLE_MENUS[role] || ROLE_MENUS.customer),
-    { label: "Update Profile", href: "/dashboard/profile", icon: UserCog },
+    { label: 'Update Profile', href: '/dashboard/profile', icon: UserCog },
   ];
 
   const handleSignOut = async () => {
     await signOut();
-    toast.success("Signed out successfully");
-    router.push("/");
+    toast.success('Signed out successfully');
+    router.push('/');
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-50">
-      {/* Mobile Sidebar Backdrop */}
+    <div className="min-h-screen flex bg-[#F4F6FB] dark:bg-[#060913] text-slate-900 dark:text-slate-100 transition-colors">
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs lg:hidden"
         />
       )}
 
       {/* Collapsible Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-300 flex flex-col transition-transform duration-200 lg:static lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-950 text-slate-300 border-r border-slate-800/80 flex flex-col transition-transform duration-200 lg:static lg:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="h-16 px-6 flex items-center justify-between border-b border-slate-800">
+        <div className="h-16 px-6 flex items-center justify-between border-b border-slate-800/80">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-linear-to-br from-indigo-600 to-cyan-500 text-white flex items-center justify-center shadow-md shadow-indigo-600/30">
               <Wrench className="w-4 h-4" />
             </div>
-            <span className="text-lg font-extrabold text-white">
-              Fix<span className="text-blue-500">Mate</span>
+            <span
+              style={{ fontFamily: 'var(--font-display)' }}
+              className="text-lg font-black text-white"
+            >
+              Fix<span className="text-cyan-400">Mate</span>
             </span>
           </Link>
           <button
@@ -179,7 +144,7 @@ export default function DashboardLayout({
           </button>
         </div>
 
-        <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-3 py-5 space-y-1.5 overflow-y-auto">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -188,10 +153,10 @@ export default function DashboardLayout({
                 key={item.href}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition ${
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                   isActive
-                    ? "bg-blue-600 text-white shadow-xs"
-                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                    ? 'bg-linear-to-r from-indigo-600 to-cyan-600 text-white shadow-lg shadow-indigo-600/25'
+                    : 'text-slate-300 hover:bg-slate-900 hover:text-white'
                 }`}
               >
                 <Icon className="w-4 h-4 shrink-0" />
@@ -201,17 +166,17 @@ export default function DashboardLayout({
           })}
         </nav>
 
-        <div className="p-3 border-t border-slate-800 space-y-1">
+        <div className="p-3 border-t border-slate-800/80 space-y-1">
           <Link
             href="/"
-            className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition"
+            className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-900 hover:text-white transition"
           >
             <Home className="w-4 h-4" />
             Back to Home
           </Link>
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition"
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-rose-400 hover:bg-rose-950/50 transition"
           >
             <LogOut className="w-4 h-4" />
             Sign Out
@@ -221,48 +186,51 @@ export default function DashboardLayout({
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Bar */}
-        <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
+        <header className="h-16 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100"
+              className="lg:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
               aria-label="Open sidebar"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <span className="text-sm font-semibold text-slate-500 hidden sm:inline">
-              Dashboard Portal
+            <span className="text-sm font-bold text-slate-500 dark:text-slate-400 capitalize hidden sm:inline">
+              {role} Workspace
             </span>
           </div>
 
           <div className="flex items-center gap-3">
+            <ThemeToggle />
+
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold text-slate-900 leading-none">
+              <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">
                 {user.name}
               </p>
-              <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-blue-50 text-blue-700">
+              <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-cyan-300 border border-indigo-100 dark:border-indigo-800">
                 {role}
               </span>
             </div>
+
             <Image
               src={
                 user.image ||
                 `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                  user.name || "User",
-                )}&background=2563eb&color=fff`
+                  user.name || 'User'
+                )}&background=4f46e5&color=fff`
               }
-              alt={user.name || "User"}
+              alt={user.name || 'User'}
               width={36}
               height={36}
               unoptimized
-              className="w-9 h-9 rounded-full object-cover border border-slate-200"
+              className="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-700"
             />
           </div>
         </header>
 
-        {/* Full-Width Dashboard Page Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+          {children}
+        </main>
       </div>
     </div>
   );

@@ -51,6 +51,11 @@ export type BookingStatus =
 
 export type PaymentStatus = "unpaid" | "paid";
 
+export interface StatusHistoryItem {
+  status: string;
+  changedAt: string;
+}
+
 export interface Booking {
   _id: string;
   serviceId: string;
@@ -69,6 +74,10 @@ export interface Booking {
   status: BookingStatus;
   finalAmount: number;
   paymentStatus: PaymentStatus;
+  statusHistory?: StatusHistoryItem[];
+  rating?: number;
+  review?: string;
+  reviewedAt?: string;
   createdAt?: string;
 }
 
