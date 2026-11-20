@@ -281,7 +281,7 @@ export default function CustomerBookingsPage() {
                           <Calendar className="w-3 h-3 text-slate-400" />
                           {new Date(b.preferredDate).toLocaleDateString()}
                         </span>
-                        <span className="inline-flex items-center gap-1 truncate max-w-[160px]">
+                        <span className="inline-flex items-center gap-1 truncate max-w-40">
                           <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
                           <span className="truncate">{b.address}</span>
                         </span>

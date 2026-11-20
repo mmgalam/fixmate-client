@@ -1,5 +1,12 @@
-import Link from 'next/link';
-import { ShieldCheck, Wrench, CreditCard, Users, ArrowRight, Sparkles } from 'lucide-react';
+import Link from "next/link";
+import {
+  ShieldCheck,
+  Wrench,
+  CreditCard,
+  Users,
+  ArrowRight,
+  Sparkles,
+} from "lucide-react";
 
 export default function AboutPage() {
   return (
@@ -10,36 +17,38 @@ export default function AboutPage() {
           <span>OUR MISSION & WORKFLOW</span>
         </div>
         <h1
-          style={{ fontFamily: 'var(--font-display)' }}
+          style={{ fontFamily: "var(--font-display)" }}
           className="text-3xl sm:text-5xl font-black text-slate-950 dark:text-white tracking-tight"
         >
           How FixMate Works
         </h1>
         <p className="mt-4 text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
-          FixMate connects everyday device owners with verified local repair technicians—bringing transparency, live status tracking, and post-repair Stripe payments to every job[cite: 3].
+          FixMate connects everyday device owners with verified local repair
+          technicians—bringing transparency, live status tracking, and
+          post-repair Stripe payments to every job.
         </p>
       </div>
 
       <div className="mt-14 grid sm:grid-cols-2 gap-6">
         {[
           {
-            title: 'Verified Service Listings',
-            desc: 'Technicians publish detailed repair offerings with clear starting prices and service modes. Every listing goes through admin moderation before going live[cite: 3].',
+            title: "Verified Service Listings",
+            desc: "Technicians publish detailed repair offerings with clear starting prices and service modes. Every listing goes through admin moderation before going live[cite: 3].",
             icon: ShieldCheck,
           },
           {
-            title: 'Clear Step-by-Step Pipeline',
-            desc: 'From Requested to Accepted, In Progress, and Completed, customers never have to wonder what is happening with their device[cite: 3].',
+            title: "Clear Step-by-Step Pipeline",
+            desc: "From Requested to Accepted, In Progress, and Completed, customers never have to wonder what is happening with their device[cite: 3].",
             icon: Wrench,
           },
           {
-            title: 'Pay-After-Completion Protection',
-            desc: 'Customers only pay once the technician finishes the repair and confirms the final amount, processed securely through Stripe Checkout[cite: 3].',
+            title: "Pay-After-Completion Protection",
+            desc: "Customers only pay once the technician finishes the repair and confirms the final amount, processed securely through Stripe Checkout[cite: 3].",
             icon: CreditCard,
           },
           {
-            title: 'Built for Local Technicians',
-            desc: 'Skilled technicians get a dedicated dashboard to showcase their expertise, toggle availability, and manage incoming requests[cite: 3].',
+            title: "Built for Local Technicians",
+            desc: "Skilled technicians get a dedicated dashboard to showcase their expertise, toggle availability, and manage incoming requests[cite: 3].",
             icon: Users,
           },
         ].map((card) => (
@@ -51,7 +60,7 @@ export default function AboutPage() {
               <card.icon className="w-6 h-6" />
             </div>
             <h2
-              style={{ fontFamily: 'var(--font-display)' }}
+              style={{ fontFamily: "var(--font-display)" }}
               className="text-xl font-extrabold text-slate-950 dark:text-white"
             >
               {card.title}

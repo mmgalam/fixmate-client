@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSession } from '@/lib/auth-client';
-import { uploadImageToImgBB } from '@/lib/imgbb';
-import { fetchWithAuth } from '@/lib/api';
-import { toast } from 'sonner';
-import { UploadCloud, PlusCircle } from 'lucide-react';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "@/lib/auth-client";
+import { uploadImageToImgBB } from "@/lib/imgbb";
+import { fetchWithAuth } from "@/lib/api";
+import { toast } from "sonner";
+import { UploadCloud, PlusCircle } from "lucide-react";
 
 const CATEGORIES = [
-  'Smartphone',
-  'Laptop & PC',
-  'AC',
-  'Refrigerator',
-  'TV',
-  'Washing Machine',
-  'Electrical',
+  "Smartphone",
+  "Laptop & PC",
+  "AC",
+  "Refrigerator",
+  "TV",
+  "Washing Machine",
+  "Electrical",
 ];
 
 export default function AddServicePage() {
@@ -23,24 +23,26 @@ export default function AddServicePage() {
   const { data: session } = useSession();
   const user = session?.user;
 
-  const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('Smartphone');
-  const [description, setDescription] = useState('');
-  const [basePrice, setBasePrice] = useState('');
-  const [estimatedDuration, setEstimatedDuration] = useState('1-2 Hours');
-  const [serviceMode, setServiceMode] = useState<'Home Visit' | 'Shop Drop-off'>('Home Visit');
-  const [serviceArea, setServiceArea] = useState('');
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("Smartphone");
+  const [description, setDescription] = useState("");
+  const [basePrice, setBasePrice] = useState("");
+  const [estimatedDuration, setEstimatedDuration] = useState("1-2 Hours");
+  const [serviceMode, setServiceMode] = useState<
+    "Home Visit" | "Shop Drop-off"
+  >("Home Visit");
+  const [serviceArea, setServiceArea] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!imageFile) {
-      toast.error('Please select a service image file');
+      toast.error("Please select a service image file");
       return;
     }
     if (Number(basePrice) <= 0) {
-      toast.error('Base price must be a positive number');
+      toast.error("Base price must be a positive number");
       return;
     }
 
@@ -48,8 +50,8 @@ export default function AddServicePage() {
     try {
       const imageUrl = await uploadImageToImgBB(imageFile);
 
-      await fetchWithAuth('/api/services', {
-        method: 'POST',
+      await fetchWithAuth("/api/services", {
+        method: "POST",
         body: JSON.stringify({
           title: title.trim(),
           category,
@@ -59,14 +61,16 @@ export default function AddServicePage() {
           estimatedDuration: estimatedDuration.trim(),
           serviceMode,
           serviceArea: serviceArea.trim(),
-          technicianName: user?.name || 'Technician',
+          technicianName: user?.name || "Technician",
         }),
       });
 
-      toast.success('Service submitted! It is now waiting for admin approval.');
-      router.push('/dashboard/technician/my-services');
+      toast.success("Service submitted! It is now waiting for admin approval.");
+      router.push("/dashboard/technician/my-services");
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Failed to create service');
+      toast.error(
+        err instanceof Error ? err.message : "Failed to create service",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -75,11 +79,14 @@ export default function AddServicePage() {
   return (
     <div className="max-w-3xl space-y-6">
       <div>
-        <h1 style={{ fontFamily: 'var(--font-display)' }} className="text-2xl font-black text-slate-950 dark:text-white">
+        <h1
+          style={{ fontFamily: "var(--font-display)" }}
+          className="text-2xl font-black text-slate-950 dark:text-white"
+        >
           Add a Repair Service
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          New listings remain pending until reviewed and approved by an Admin[cite: 2].
+          New listings remain pending until reviewed and approved by an Admin.
         </p>
       </div>
 
@@ -112,7 +119,9 @@ export default function AddServicePage() {
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
             >
               {CATEGORIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c} value={c}>
+                  {c}
+                </option>
               ))}
             </select>
           </div>
@@ -169,7 +178,9 @@ export default function AddServicePage() {
             </label>
             <select
               value={serviceMode}
-              onChange={(e) => setServiceMode(e.target.value as 'Home Visit' | 'Shop Drop-off')}
+              onChange={(e) =>
+                setServiceMode(e.target.value as "Home Visit" | "Shop Drop-off")
+              }
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
             >
               <option value="Home Visit">Home Visit</option>
@@ -200,7 +211,7 @@ export default function AddServicePage() {
             <label className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border border-dashed border-indigo-400 dark:border-cyan-500/50 bg-indigo-50/40 dark:bg-slate-800/60 cursor-pointer text-sm">
               <UploadCloud className="w-4 h-4 text-indigo-600 dark:text-cyan-400 shrink-0" />
               <span className="truncate text-slate-700 dark:text-slate-300">
-                {imageFile ? imageFile.name : 'Choose image file...'}
+                {imageFile ? imageFile.name : "Choose image file..."}
               </span>
               <input
                 type="file"
@@ -221,7 +232,7 @@ export default function AddServicePage() {
             <input
               type="text"
               readOnly
-              value={user?.name || ''}
+              value={user?.name || ""}
               className="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 text-sm cursor-not-allowed"
             />
           </div>
@@ -232,7 +243,7 @@ export default function AddServicePage() {
             <input
               type="text"
               readOnly
-              value={user?.email || ''}
+              value={user?.email || ""}
               className="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 text-sm cursor-not-allowed"
             />
           </div>
@@ -244,7 +255,7 @@ export default function AddServicePage() {
           className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-linear-to-r from-indigo-600 to-cyan-600 hover:from-indigo-700 hover:to-cyan-700 text-white text-sm font-bold shadow-lg shadow-indigo-600/25 transition disabled:opacity-60"
         >
           <PlusCircle className="w-4 h-4" />
-          {submitting ? 'Uploading & Saving...' : 'Publish Service'}
+          {submitting ? "Uploading & Saving..." : "Publish Service"}
         </button>
       </form>
     </div>
