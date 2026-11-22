@@ -18,6 +18,15 @@ export default function Tilt3DCard({
   const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Skip 3D tilt on touchscreens or when reduced motion is enabled
+    if (
+      typeof window !== "undefined" &&
+      (window.matchMedia("(pointer: coarse)").matches ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+    ) {
+      return;
+    }
+
     const el = cardRef.current;
     if (!el) return;
 
@@ -39,7 +48,7 @@ export default function Tilt3DCard({
     setGlare({
       x: (x / rect.width) * 100,
       y: (y / rect.height) * 100,
-      opacity: 0.18,
+      opacity: 0.14,
     });
   };
 
