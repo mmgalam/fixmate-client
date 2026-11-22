@@ -36,7 +36,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${jakarta.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#F4F6FB] dark:bg-[#060913] text-slate-950 dark:text-slate-100 font-sans selection:bg-indigo-600 selection:text-white">
+      <body className="flex min-h-full flex-col bg-[#F4F6FB] font-sans text-slate-950 transition-colors duration-200 selection:bg-indigo-600 selection:text-white dark:bg-[#060913] dark:text-slate-100">
         <ThemeProvider>
           {children}
           <Toaster position="top-right" richColors closeButton />

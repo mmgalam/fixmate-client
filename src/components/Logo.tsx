@@ -13,7 +13,7 @@ export default function Logo({ variant = "default" }: Props) {
     <Link
       href="/"
       aria-label="FixMate home"
-      className="group inline-flex items-center gap-2.5"
+      className="group inline-flex shrink-0 items-center gap-2.5"
     >
       <span className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-indigo-500 via-blue-500 to-cyan-400 text-white shadow-lg shadow-indigo-500/40 ring-1 ring-white/30 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105">
         <Wrench className="h-5 w-5" strokeWidth={2.4} />
