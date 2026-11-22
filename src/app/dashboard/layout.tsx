@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
-import { useSession, signOut } from '@/lib/auth-client';
-import ThemeToggle from '@/components/ThemeToggle';
-import { toast } from 'sonner';
-import type { LucideIcon } from 'lucide-react';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
+import { useSession, signOut } from "@/lib/auth-client";
+import ThemeToggle from "@/components/ThemeToggle";
+import Logo from "@/components/Logo";
+import { toast } from "sonner";
+import type { LucideIcon } from "lucide-react";
 import {
-  Wrench,
   LayoutDashboard,
   ClipboardList,
   CreditCard,
@@ -24,7 +24,7 @@ import {
   LogOut,
   Menu,
   X,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface NavItem {
   label: string;
@@ -34,22 +34,22 @@ interface NavItem {
 
 const ROLE_MENUS: Record<string, NavItem[]> = {
   customer: [
-    { label: 'Overview', href: '/dashboard/customer', icon: LayoutDashboard },
-    { label: 'My Bookings', href: '/dashboard/customer/bookings', icon: ClipboardList },
-    { label: 'Payment History', href: '/dashboard/customer/payments', icon: CreditCard },
+    { label: "Overview", href: "/dashboard/customer", icon: LayoutDashboard },
+    { label: "My Bookings", href: "/dashboard/customer/bookings", icon: ClipboardList },
+    { label: "Payment History", href: "/dashboard/customer/payments", icon: CreditCard },
   ],
   technician: [
-    { label: 'Overview', href: '/dashboard/technician', icon: LayoutDashboard },
-    { label: 'Add a Service', href: '/dashboard/technician/add-service', icon: PlusCircle },
-    { label: 'My Services', href: '/dashboard/technician/my-services', icon: Briefcase },
-    { label: 'Manage Requests', href: '/dashboard/technician/requests', icon: Inbox },
+    { label: "Overview", href: "/dashboard/technician", icon: LayoutDashboard },
+    { label: "Add a Service", href: "/dashboard/technician/add-service", icon: PlusCircle },
+    { label: "My Services", href: "/dashboard/technician/my-services", icon: Briefcase },
+    { label: "Manage Requests", href: "/dashboard/technician/requests", icon: Inbox },
   ],
   admin: [
-    { label: 'Overview', href: '/dashboard/admin', icon: LayoutDashboard },
-    { label: 'Manage Users', href: '/dashboard/admin/users', icon: Users },
-    { label: 'Service Approval', href: '/dashboard/admin/services', icon: CheckSquare },
-    { label: 'All Bookings', href: '/dashboard/admin/bookings', icon: ClipboardList },
-    { label: 'Transactions', href: '/dashboard/admin/transactions', icon: Receipt },
+    { label: "Overview", href: "/dashboard/admin", icon: LayoutDashboard },
+    { label: "Manage Users", href: "/dashboard/admin/users", icon: Users },
+    { label: "Service Approval", href: "/dashboard/admin/services", icon: CheckSquare },
+    { label: "All Bookings", href: "/dashboard/admin/bookings", icon: ClipboardList },
+    { label: "Transactions", href: "/dashboard/admin/transactions", icon: Receipt },
   ],
 };
 
@@ -64,7 +64,7 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const user = session?.user;
-  const role = (user?.role as string) || 'customer';
+  const role = (user?.role as string) || "customer";
 
   useEffect(() => {
     if (isPending) return;
@@ -74,77 +74,86 @@ export default function DashboardLayout({
       return;
     }
 
-    if (pathname === '/dashboard') {
+    if (pathname === "/dashboard") {
       router.replace(`/dashboard/${role}`);
       return;
     }
 
-    if (!pathname.startsWith('/dashboard/profile')) {
-      if (pathname.startsWith('/dashboard/customer') && role !== 'customer') {
+    if (!pathname.startsWith("/dashboard/profile")) {
+      if (pathname.startsWith("/dashboard/customer") && role !== "customer") {
         router.replace(`/dashboard/${role}`);
-      } else if (pathname.startsWith('/dashboard/technician') && role !== 'technician') {
+      } else if (pathname.startsWith("/dashboard/technician") && role !== "technician") {
         router.replace(`/dashboard/${role}`);
-      } else if (pathname.startsWith('/dashboard/admin') && role !== 'admin') {
+      } else if (pathname.startsWith("/dashboard/admin") && role !== "admin") {
         router.replace(`/dashboard/${role}`);
       }
     }
   }, [user, isPending, pathname, role, router]);
 
+  // Close mobile sidebar on Escape key and lock background scroll while open
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSidebarOpen(false);
+    };
+    window.addEventListener("keydown", handleEscape);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [sidebarOpen]);
+
   if (isPending || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F4F6FB] dark:bg-[#060913]">
-        <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+      <div className="flex min-h-screen items-center justify-center bg-[#F4F6FB] dark:bg-[#060913]">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
       </div>
     );
   }
 
   const menuItems = [
     ...(ROLE_MENUS[role] || ROLE_MENUS.customer),
-    { label: 'Update Profile', href: '/dashboard/profile', icon: UserCog },
+    { label: "Update Profile", href: "/dashboard/profile", icon: UserCog },
   ];
 
   const handleSignOut = async () => {
     await signOut();
-    toast.success('Signed out successfully');
-    router.push('/');
+    toast.success("Signed out successfully");
+    router.push("/");
   };
 
   return (
-    <div className="min-h-screen flex bg-[#F4F6FB] dark:bg-[#060913] text-slate-900 dark:text-slate-100 transition-colors">
+    <div className="flex min-h-screen bg-[#F4F6FB] text-slate-900 transition-colors dark:bg-[#060913] dark:text-slate-100">
       {sidebarOpen && (
         <div
+          aria-hidden="true"
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden"
         />
       )}
 
       {/* Collapsible Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-950 text-slate-300 border-r border-slate-800/80 flex flex-col transition-transform duration-200 lg:static lg:translate-x-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col border-r border-slate-800/80 bg-slate-950 text-slate-300 transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="h-16 px-6 flex items-center justify-between border-b border-slate-800/80">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-linear-to-br from-indigo-600 to-cyan-500 text-white flex items-center justify-center shadow-md shadow-indigo-600/30">
-              <Wrench className="w-4 h-4" />
-            </div>
-            <span
-              style={{ fontFamily: 'var(--font-display)' }}
-              className="text-lg font-black text-white"
-            >
-              Fix<span className="text-cyan-400">Mate</span>
-            </span>
-          </Link>
+        <div className="flex h-16 items-center justify-between border-b border-slate-800/80 px-5">
+          <Logo variant="footer" />
           <button
+            type="button"
+            aria-label="Close sidebar"
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden text-slate-400 hover:text-white"
+            className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-900 hover:text-white lg:hidden"
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <nav className="flex-1 px-3 py-5 space-y-1.5 overflow-y-auto">
+        <nav className="flex-1 space-y-1.5 overflow-y-auto px-3 py-5">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -153,61 +162,64 @@ export default function DashboardLayout({
                 key={item.href}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all ${
                   isActive
-                    ? 'bg-linear-to-r from-indigo-600 to-cyan-600 text-white shadow-lg shadow-indigo-600/25'
-                    : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                    ? "bg-linear-to-r from-indigo-600 to-cyan-600 text-white shadow-lg shadow-indigo-600/25"
+                    : "text-slate-300 hover:bg-slate-900 hover:text-white"
                 }`}
               >
-                <Icon className="w-4 h-4 shrink-0" />
+                <Icon className="h-4 w-4 shrink-0" />
                 {item.label}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-3 border-t border-slate-800/80 space-y-1">
+        <div className="space-y-1 border-t border-slate-800/80 p-3">
           <Link
             href="/"
-            className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-900 hover:text-white transition"
+            onClick={() => setSidebarOpen(false)}
+            className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-900 hover:text-white"
           >
-            <Home className="w-4 h-4" />
+            <Home className="h-4 w-4 shrink-0" />
             Back to Home
           </Link>
           <button
+            type="button"
             onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-rose-400 hover:bg-rose-950/50 transition"
+            className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-rose-400 transition hover:bg-rose-950/50"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="h-4 w-4 shrink-0" />
             Sign Out
           </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200/80 bg-white/85 px-4 backdrop-blur-xl sm:px-6 dark:border-slate-800 dark:bg-slate-900/85">
           <div className="flex items-center gap-3">
             <button
+              type="button"
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="rounded-xl p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden dark:text-slate-300 dark:hover:bg-slate-800"
               aria-label="Open sidebar"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="h-5 w-5" />
             </button>
-            <span className="text-sm font-bold text-slate-500 dark:text-slate-400 capitalize hidden sm:inline">
+            <span className="hidden text-sm font-bold capitalize text-slate-500 sm:inline dark:text-slate-400">
               {role} Workspace
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3">
             <ThemeToggle />
 
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">
+            <div className="text-right">
+              <p className="max-w-27.5 truncate text-xs font-bold leading-none text-slate-900 sm:max-w-45 sm:text-sm dark:text-white">
                 {user.name}
               </p>
-              <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-cyan-300 border border-indigo-100 dark:border-indigo-800">
+              <span className="mt-1 inline-block rounded-full border border-indigo-100 bg-indigo-50 px-2 py-0.5 text-[10px] font-bold uppercase text-indigo-700 dark:border-indigo-800/60 dark:bg-indigo-950 dark:text-cyan-300">
                 {role}
               </span>
             </div>
@@ -216,19 +228,19 @@ export default function DashboardLayout({
               src={
                 user.image ||
                 `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                  user.name || 'User'
+                  user.name || "User",
                 )}&background=4f46e5&color=fff`
               }
-              alt={user.name || 'User'}
+              alt={user.name || "User"}
               width={36}
               height={36}
               unoptimized
-              className="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-700"
+              className="h-9 w-9 shrink-0 rounded-full border border-slate-200 object-cover dark:border-slate-700"
             />
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+        <main className="mx-auto w-full max-w-7xl flex-1 p-4 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>
