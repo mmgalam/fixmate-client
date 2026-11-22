@@ -9,21 +9,31 @@ export async function fetchWithAuth(
   if (!tokenRes.ok) {
     throw new Error("Authentication required. Please sign in again.");
   }
-  const { token } = await tokenRes.json();
+
+  const tokenData = (await tokenRes.json().catch(() => ({}))) as {
+    token?: string;
+  };
+  if (!tokenData.token) {
+    throw new Error("Invalid session token. Please sign in again.");
+  }
 
   // 2. Call Express backend with Bearer token
   const res = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${tokenData.token}`,
       ...options.headers,
     },
   });
 
-  const data = await res.json();
+  const data = (await res.json().catch(() => ({}))) as {
+    message?: string;
+    [key: string]: unknown;
+  };
+
   if (!res.ok) {
-    throw new Error(data.message || "Request failed");
+    throw new Error(data.message || `Request failed (${res.status})`);
   }
 
   return data;
