@@ -7,8 +7,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "@/lib/auth-client";
 import { toast } from "sonner";
 import ThemeToggle from "@/components/ThemeToggle";
+import Logo from "@/components/Logo";
 import {
-  Wrench,
   Menu,
   X,
   LayoutDashboard,
@@ -30,11 +30,19 @@ export default function Navbar() {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [prevPathname, setPrevPathname] = useState(pathname);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close the profile dropdown when clicking outside of it
+  // Close menus automatically when route changes (without useEffect)
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
+    setMobileOpen(false);
+    setDropdownOpen(false);
+  }
+
+  // Close profile dropdown on outside click or Escape key
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent) => {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(e.target as Node)
@@ -42,8 +50,20 @@ export default function Navbar() {
         setDropdownOpen(false);
       }
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setDropdownOpen(false);
+        setMobileOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, []);
 
   const isActive = (href: string) =>
@@ -68,33 +88,20 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-3 z-50 px-3 sm:px-6">
-      <div className="max-w-7xl mx-auto h-16 px-4 sm:px-6 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-800/90 shadow-[0_14px_35px_-10px_rgba(15,23,42,0.12)] dark:shadow-[0_14px_35px_-10px_rgba(0,0,0,0.65)] flex items-center justify-between">
-        {/* Brand logo (same style as footer) */}
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-xl bg-linear-to-br from-indigo-600 via-blue-600 to-cyan-500 text-white flex items-center justify-center shadow-lg shadow-indigo-600/30 group-hover:rotate-6 transition-transform duration-300">
-            <Wrench className="w-4 h-4" />
-          </div>
-          <span
-            style={{ fontFamily: "var(--font-display)" }}
-            className="text-xl font-black tracking-tight text-slate-950 dark:text-white"
-          >
-            Fix
-            <span className="bg-linear-to-r from-indigo-600 to-cyan-400 bg-clip-text text-transparent">
-              Mate
-            </span>
-          </span>
-        </Link>
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between rounded-2xl border border-slate-200/80 bg-white/95 px-4 shadow-lg shadow-slate-900/5 backdrop-blur-md sm:px-6 dark:border-slate-800 dark:bg-slate-900/95 dark:shadow-slate-950/40">
+        {/* Brand logo (shared component) */}
+        <Logo />
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-1 bg-slate-100/90 dark:bg-slate-800/80 p-1.5 rounded-xl border border-slate-200/70 dark:border-slate-700/70">
+        <nav className="hidden md:flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-100/90 p-1.5 dark:border-slate-700/80 dark:bg-slate-800/90">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all duration-200 ${
+              className={`rounded-lg px-4 py-1.5 text-sm font-bold transition-all duration-200 ${
                 isActive(link.href)
-                  ? "bg-white dark:bg-slate-950 text-indigo-600 dark:text-cyan-400 shadow-xs"
-                  : "text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white"
+                  ? "bg-white text-indigo-600 shadow-xs dark:bg-slate-950 dark:text-cyan-400"
+                  : "text-slate-600 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white"
               }`}
             >
               {link.label}
@@ -107,18 +114,18 @@ export default function Navbar() {
           <ThemeToggle />
 
           {isPending ? (
-            <div className="w-28 h-9 bg-slate-100 dark:bg-slate-800 rounded-xl animate-pulse" />
+            <div className="h-9 w-28 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
           ) : !user ? (
             <>
               <Link
                 href="/sign-in"
-                className="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-cyan-400 transition"
+                className="px-4 py-2 text-sm font-bold text-slate-700 transition hover:text-indigo-600 dark:text-slate-200 dark:hover:text-cyan-400"
               >
                 Sign In
               </Link>
               <Link
                 href="/sign-up"
-                className="inline-flex items-center px-5 py-2.5 text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md hover:-translate-y-0.5 transition-all"
+                className="inline-flex items-center rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/20 transition-all hover:-translate-y-0.5 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600"
               >
                 Sign Up
               </Link>
@@ -126,10 +133,11 @@ export default function Navbar() {
           ) : (
             <div className="relative" ref={dropdownRef}>
               <button
+                type="button"
                 onClick={() => setDropdownOpen((v) => !v)}
                 aria-haspopup="menu"
                 aria-expanded={dropdownOpen}
-                className="flex items-center gap-2.5 pl-1.5 pr-3 py-1 rounded-full border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-md shadow-slate-900/5 hover:shadow-lg transition-all"
+                className="flex cursor-pointer items-center gap-2.5 rounded-full border border-slate-200 bg-white py-1 pl-1.5 pr-3 shadow-md shadow-slate-900/5 transition-all hover:shadow-lg dark:border-slate-700 dark:bg-slate-800"
               >
                 <Image
                   src={avatarSrc}
@@ -137,29 +145,33 @@ export default function Navbar() {
                   width={32}
                   height={32}
                   unoptimized
-                  className="w-8 h-8 rounded-full object-cover"
+                  className="h-8 w-8 rounded-full object-cover ring-2 ring-indigo-500/20"
                 />
                 <div className="text-left">
-                  <p className="text-xs font-bold text-slate-900 dark:text-white max-w-27.5 truncate">
+                  <p className="max-w-27.5 truncate text-xs font-bold text-slate-900 dark:text-white">
                     {user.name}
                   </p>
-                  <p className="text-xs capitalize text-indigo-600 dark:text-cyan-400 font-bold">
+                  <p className="text-xs font-bold capitalize text-indigo-600 dark:text-cyan-400">
                     {role}
                   </p>
                 </div>
-                <ChevronDown className="w-4 h-4 text-slate-500" />
+                <ChevronDown
+                  className={`h-4 w-4 text-slate-500 transition-transform duration-200 dark:text-slate-400 ${
+                    dropdownOpen ? "rotate-180" : ""
+                  }`}
+                />
               </button>
 
               {dropdownOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 mt-2.5 w-60 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/80 dark:border-slate-800 py-2 z-50"
+                  className="absolute right-0 z-50 mt-2.5 w-60 rounded-2xl border border-slate-200 bg-white py-2 shadow-2xl dark:border-slate-800 dark:bg-slate-900"
                 >
-                  <div className="px-4 py-2.5 border-b border-slate-100 dark:border-slate-800">
-                    <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                  <div className="border-b border-slate-100 px-4 py-2.5 dark:border-slate-800">
+                    <p className="truncate text-sm font-bold text-slate-900 dark:text-white">
                       {user.name}
                     </p>
-                    <span className="inline-block mt-1 px-2.5 py-0.5 text-xs font-bold capitalize rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-cyan-300 border border-indigo-100 dark:border-indigo-800">
+                    <span className="mt-1 inline-block rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-0.5 text-xs font-bold capitalize text-indigo-700 dark:border-indigo-800/60 dark:bg-indigo-950/80 dark:text-cyan-300">
                       {role}
                     </span>
                   </div>
@@ -167,26 +179,27 @@ export default function Navbar() {
                   <Link
                     href={dashboardHref}
                     onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50/60 dark:hover:bg-slate-800"
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-indigo-50/60 dark:text-slate-200 dark:hover:bg-slate-800"
                   >
-                    <LayoutDashboard className="w-4 h-4 text-indigo-600 dark:text-cyan-400" />
+                    <LayoutDashboard className="h-4 w-4 text-indigo-600 dark:text-cyan-400" />
                     Dashboard
                   </Link>
 
                   <Link
                     href="/dashboard/profile"
                     onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50/60 dark:hover:bg-slate-800"
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-indigo-50/60 dark:text-slate-200 dark:hover:bg-slate-800"
                   >
-                    <UserCog className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                    <UserCog className="h-4 w-4 text-slate-500 dark:text-slate-400" />
                     Update Profile
                   </Link>
 
                   <button
+                    type="button"
                     onClick={handleSignOut}
-                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 border-t border-slate-100 dark:border-slate-800 mt-1"
+                    className="mt-1 flex w-full cursor-pointer items-center gap-2.5 border-t border-slate-100 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 dark:border-slate-800 dark:text-red-400 dark:hover:bg-red-950/40"
                   >
-                    <LogOut className="w-4 h-4" />
+                    <LogOut className="h-4 w-4" />
                     Sign Out
                   </button>
                 </div>
@@ -196,18 +209,19 @@ export default function Navbar() {
         </div>
 
         {/* Mobile theme toggle + hamburger */}
-        <div className="flex md:hidden items-center gap-2">
+        <div className="flex items-center gap-2 md:hidden">
           <ThemeToggle />
           <button
+            type="button"
             onClick={() => setMobileOpen((v) => !v)}
-            className="p-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="cursor-pointer rounded-xl p-2 text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
             aria-label="Toggle menu"
             aria-expanded={mobileOpen}
           >
             {mobileOpen ? (
-              <X className="w-5 h-5" />
+              <X className="h-5 w-5" />
             ) : (
-              <Menu className="w-5 h-5" />
+              <Menu className="h-5 w-5" />
             )}
           </button>
         </div>
@@ -215,68 +229,87 @@ export default function Navbar() {
 
       {/* Mobile drawer */}
       {mobileOpen && (
-        <div className="md:hidden mt-2 max-w-7xl mx-auto bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-4 space-y-3">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMobileOpen(false)}
-              className={`block px-3 py-2 rounded-xl text-sm font-bold ${
-                isActive(link.href)
-                  ? "bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-cyan-400"
-                  : "text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+        <div className="mx-auto mt-2 max-w-7xl space-y-3 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-2xl backdrop-blur-md md:hidden dark:border-slate-800 dark:bg-slate-900/95">
+          <div className="space-y-1">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className={`block rounded-xl px-3 py-2.5 text-sm font-bold transition ${
+                  isActive(link.href)
+                    ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/80 dark:text-cyan-400"
+                    : "text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
 
-          <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
-            {!user ? (
-              <div className="grid grid-cols-2 gap-2">
+          <div className="border-t border-slate-100 pt-3 dark:border-slate-800">
+            {isPending ? (
+              <div className="h-10 w-full animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
+            ) : !user ? (
+              <div className="grid grid-cols-2 gap-2.5">
                 <Link
                   href="/sign-in"
                   onClick={() => setMobileOpen(false)}
-                  className="py-2.5 text-center border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200"
+                  className="rounded-xl border border-slate-200 py-2.5 text-center text-sm font-bold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/sign-up"
                   onClick={() => setMobileOpen(false)}
-                  className="py-2.5 text-center bg-indigo-600 rounded-xl text-sm font-bold text-white"
+                  className="rounded-xl bg-indigo-600 py-2.5 text-center text-sm font-bold text-white transition hover:bg-indigo-700 dark:bg-indigo-500"
                 >
                   Sign Up
                 </Link>
               </div>
             ) : (
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between px-2 pb-2">
-                  <span className="text-sm font-bold text-slate-900 dark:text-white">
-                    {user.name}
-                  </span>
-                  <span className="px-2.5 py-0.5 text-xs font-bold capitalize rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-cyan-300">
+                <div className="flex items-center justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2 dark:bg-slate-800/60">
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <Image
+                      src={avatarSrc}
+                      alt={user.name || "User"}
+                      width={32}
+                      height={32}
+                      unoptimized
+                      className="h-8 w-8 shrink-0 rounded-full object-cover"
+                    />
+                    <span className="truncate text-sm font-bold text-slate-900 dark:text-white">
+                      {user.name}
+                    </span>
+                  </div>
+                  <span className="shrink-0 rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-0.5 text-xs font-bold capitalize text-indigo-700 dark:border-indigo-800/60 dark:bg-indigo-950 dark:text-cyan-300">
                     {role}
                   </span>
                 </div>
+
                 <Link
                   href={dashboardHref}
                   onClick={() => setMobileOpen(false)}
-                  className="block px-3 py-2 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
+                  <LayoutDashboard className="h-4 w-4 text-indigo-600 dark:text-cyan-400" />
                   Dashboard
                 </Link>
                 <Link
                   href="/dashboard/profile"
                   onClick={() => setMobileOpen(false)}
-                  className="block px-3 py-2 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
+                  <UserCog className="h-4 w-4 text-slate-500 dark:text-slate-400" />
                   Update Profile
                 </Link>
                 <button
+                  type="button"
                   onClick={handleSignOut}
-                  className="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40"
+                  className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-semibold text-red-600 transition hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
                 >
+                  <LogOut className="h-4 w-4" />
                   Sign Out
                 </button>
               </div>
